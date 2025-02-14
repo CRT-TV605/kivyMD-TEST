@@ -6,7 +6,7 @@
 [app]
 
 # (str) Title of your application
-title = My Application
+title = CALCULADORA_JESUS_REYES_2024
 
 # (str) Package name
 package.name = myapp
