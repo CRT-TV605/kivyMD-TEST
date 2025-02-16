@@ -1,118 +1,95 @@
-# @autor: Magno Efren
-# Youtube: https://www.youtube.com/c/MagnoEfren/videos
-# Calculadora Basica
-from kivy.app import App
+
+from kivymd.app import MDApp
 from kivy.lang import Builder
+from kivy.core.window import Window
+from kivy.uix.screenmanager import ScreenManager
+from kivymd.uix.snackbar import Snackbar
+import urllib.request
+import openai # pip install openai
+import os
+Window.size = (350,500)
 
-class Calculadora(App):
+class Ui(ScreenManager):
+    pass
+
+class MainApp(MDApp):
+    size_image = '512x512'
     def build(self):
-        return Builder.load_string(KV)
-    def operacion(self, data):
+        self.theme_cls.theme_style = 'Dark'
+        self.theme_cls.primary_palette = 'DeepPurple'
+        Builder.load_file('style.kv')
+        return Ui()
+
+    def generate_image(self):
+        prompt = self.root.ids.text_prompt.text
+        if len(prompt)>=8:
+            try:
+                openai.api_key ='API_KEY'
+                res = openai.Image.create(
+                    prompt = prompt,
+                    n = 3,
+                    size = self.size_image
+                )
+                self.image_url1 = res['data'][0]['url']
+                self.image_url2 = res['data'][1]['url']
+                self.image_url3 = res['data'][2]['url']
+
+                self.root.ids.image_one.source = self.image_url1
+                self.root.ids.image_two.source = self.image_url2
+                self.root.ids.image_three.source = self.image_url3
+            except Exception as e:
+                Snackbar(text = 'Error al conectar a internet').open()
+        else:
+            Snackbar(text = 'Ingrese un texto mas amplio').open()
+
+
+    def download_image_one(self):
+        folder_name = 'imagenes'
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+        new_filename = 'imagen1.png'
+        i = 1
+        while os.path.exists(os.path.join(folder_name, new_filename)):
+            new_filename = f'imagen({i}).png'
+            i+=1
         try:
-            self.root.pantalla.text = str(eval(data))
-        except SyntaxError:
-            self.root.pantalla.text = '' #ERROR
-        except ZeroDivisionError:
-            self.root.pantalla.text = '' #NO SE PUEDE DIVIDIR ENTRE CERO
-        except  TypeError:
-            self.root.pantalla.text = '' # (2)(2)  x 
+            urllib.request.urlretrieve(self.image_url1, os.path.join(folder_name, new_filename))
+            Snackbar(text = 'Imagen guardada con exito')
+        except:
+            Snackbar(text = 'No se pudo guardar la imagen')
 
-    def borrar_uno(self,i):
-        n = str(self.root.pantalla.text)[:-1]
-        self.root.pantalla.text = n
 
-KV = '''
-<FormaButton@Button>:
-    font_size: self.width/3
-    color: '#FFFFFF'
-GridLayout
-    pantalla: entry
-    rows: 6
-    padding: 5
-    spacing: 5
-    BoxLayout:
-        TextInput:
-            id: entry
-            halign: 'right'
-            font_size: 35
-           # multiline: False
-    BoxLayout:
-        spacing: 5
-        FormaButton:
-            text: "7"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "8"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "9"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "AC"
-            on_press: app.borrar_uno(entry.text)
-            background_color: '#DD0044'
-    BoxLayout:
-        spacing: 5
-        FormaButton:
-            text: "4"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "5"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "6"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "+"
-            on_press: entry.text += self.text
-            background_color: '#00D4FF'
-    BoxLayout:
-        spacing: 5
-        FormaButton:
-            text: "1"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "2"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "3"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "-"
-            on_press: entry.text += self.text
-            background_color: '#00D4FF'
-    BoxLayout:
-        spacing: 5
-        FormaButton:
-            text: "."
-            on_press: entry.text += self.text         
-        FormaButton:
-            text: "0"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "C"
-            on_press: entry.text = ""
-            background_color: (1,0,0,1) 
-        FormaButton:
-            text: "*"
-            on_press: entry.text += self.text
-            background_color: '#00D4FF'
-    BoxLayout:
-        spacing: 5
-        FormaButton:
-            text: "("
-            on_press: entry.text += self.text
-        FormaButton:
-            text: ")"
-            on_press: entry.text += self.text
-        FormaButton:
-            text: "="
-            on_press: app.operacion(entry.text)
-            background_color: '#F503F9'
-        FormaButton:
-            text: "/"
-            on_press: entry.text += self.text
-            background_color: '#00D4FF'
-'''
-if __name__ == "__main__":
-    Calculadora().run()
+    def download_image_two(self):
+        folder_name = 'imagenes'
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+        new_filename = 'imagen2.png'
+        i = 1
+        while os.path.exists(os.path.join(folder_name, new_filename)):
+            new_filename = f'imagen2({i}).png'
+            i+=1
+        try:
+            urllib.request.urlretrieve(self.image_url2, os.path.join(folder_name, new_filename))
+            Snackbar(text = 'Imagen guardada con exito')
+        except:
+            Snackbar(text = 'No se pudo guardar la imagen')
+
+    def download_image_three(self):
+        folder_name = 'imagenes'
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+        new_filename = 'imagen3.png'
+        i = 1
+        while os.path.exists(os.path.join(folder_name, new_filename)):
+            new_filename = f'imagen3({i}).png'
+            i+=1
+        try:
+            urllib.request.urlretrieve(self.image_url3, os.path.join(folder_name, new_filename))
+            Snackbar(text = 'Imagen guardada con exito')
+        except:
+            Snackbar(text = 'No se pudo guardar la imagen')
+
+    def checkbox_size(self, x):
+        self.size_image = x
+if __name__ =="__main__":
+    MainApp().run()
